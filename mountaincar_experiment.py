@@ -177,9 +177,13 @@ class SarsaAgent(BaseAgent):
         # using the reward, action_value, self.gamma, self.w,
         # self.alpha, and the Sarsa update from the textbook
 
-        ### START CODE HERE ###
+        active_tiles = self.tc.get_tiles(position, velocity)
+        current_action, action_value = self.select_action(active_tiles)
 
-        ### END CODE HERE ###
+        target = reward + self.gamma * action_value
+        last_action_value = np.sum(self.w[self.last_action][self.previous_tiles])
+        gradient = 1
+        self.w[self.last_action][self.previous_tiles] += self.alpha * (target - last_action_value) * gradient
 
         self.last_action = current_action
         self.previous_tiles = np.copy(active_tiles)
