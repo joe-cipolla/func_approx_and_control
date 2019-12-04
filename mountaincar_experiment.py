@@ -197,7 +197,10 @@ class SarsaAgent(BaseAgent):
         # Hint - there is no action_value used here because this is the end
         # of the episode.
 
-        target = reward + (self.gamma * action_value)
+        active_tiles = self.tc.get_tiles(position, velocity)
+        current_action, action_value = self.select_action(active_tiles)
+
+        target = reward + self.gamma * action_value
         last_action_value = np.sum(self.w[self.last_action][self.previous_tiles])
         gradient = 1
         self.w[self.last_action][self.previous_tiles] += self.alpha * (target - last_action_value) * gradient
