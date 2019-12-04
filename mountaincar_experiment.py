@@ -197,9 +197,10 @@ class SarsaAgent(BaseAgent):
         # Hint - there is no action_value used here because this is the end
         # of the episode.
 
-        ### START CODE HERE ###
-
-        ### END CODE HERE ###
+        target = reward + (self.gamma * action_value)
+        last_action_value = np.sum(self.w[self.last_action][self.previous_tiles])
+        gradient = 1
+        self.w[self.last_action][self.previous_tiles] += self.alpha * (target - last_action_value) * gradient
 
     def agent_cleanup(self):
         """Cleanup done after the agent ends."""
