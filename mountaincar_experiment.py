@@ -149,9 +149,9 @@ class SarsaAgent(BaseAgent):
         # set current_action to the epsilon greedy chosen action using
         # the select_action function above with the active tiles
 
-        active_tiles = self.get_tiles(position, velocity)
-        current_action = self.select_action(active_tiles)
-        
+        active_tiles = self.tc.get_tiles(position, velocity)
+        current_action = self.select_action(active_tiles)[0]
+
         self.last_action = current_action
         self.previous_tiles = np.copy(active_tiles)
         return self.last_action
