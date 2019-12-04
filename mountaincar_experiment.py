@@ -219,46 +219,6 @@ class SarsaAgent(BaseAgent):
         pass
 
 
-
-
-
-
-
-
-
-
-
-### Unit tests
-tests = [[-1.0, 0.01], [0.1, -0.01], [0.2, -0.05], [-1.0, 0.011], [0.2, -0.05]]
-
-mctc = MountainCarTileCoder(iht_size=1024, num_tilings=8, num_tiles=8)
-
-t = []
-for test in tests:
-    position, velocity = test
-    tiles = mctc.get_tiles(position=position, velocity=velocity)
-    t.append(tiles)
-
-print("Your results:")
-for tiles in t:
-    print(tiles)
-
-print()
-print("Expected results:")
-expected = """[0 1 2 3 4 5 6 7]
-[ 8  9 10 11 12 13 14 15]
-[16 17 18 19 20 21 22 23]
-[ 0 24  2  3  4  5  6  7]
-[16 17 18 19 20 21 22 23]
-"""
-print(expected)
-
-np.random.seed(1)
-mctc_test = MountainCarTileCoder(iht_size=1024, num_tilings=8, num_tiles=8)
-test = [mctc_test.get_tiles(np.random.uniform(-1.2, 0.5), np.random.uniform(-0.07, 0.07)) for _ in range(10)]
-np.save("tiles_test", test)
-
-
 # Test Epsilon Greedy Function
 agent = SarsaAgent()
 agent.agent_init({"epsilon": 0.1})
@@ -318,7 +278,6 @@ plt.plot(np.mean(np.array(all_steps), axis=0))
 np.save("sarsa_test", np.array(all_steps))
 
 
-
 # Compare the three
 num_runs = 20
 num_episodes = 100
@@ -367,3 +326,35 @@ plt.legend(["num_tiles: {}, num_tilings: {}, alpha: {}".format(agent_info["num_t
                                                                agent_info["num_tilings"],
                                                                agent_info["alpha"])
             for agent_info in agent_info_options])
+
+
+
+### Unit tests
+tests = [[-1.0, 0.01], [0.1, -0.01], [0.2, -0.05], [-1.0, 0.011], [0.2, -0.05]]
+
+mctc = MountainCarTileCoder(iht_size=1024, num_tilings=8, num_tiles=8)
+
+t = []
+for test in tests:
+    position, velocity = test
+    tiles = mctc.get_tiles(position=position, velocity=velocity)
+    t.append(tiles)
+
+print("Your results:")
+for tiles in t:
+    print(tiles)
+
+print()
+print("Expected results:")
+expected = """[0 1 2 3 4 5 6 7]
+[ 8  9 10 11 12 13 14 15]
+[16 17 18 19 20 21 22 23]
+[ 0 24  2  3  4  5  6  7]
+[16 17 18 19 20 21 22 23]
+"""
+print(expected)
+
+np.random.seed(1)
+mctc_test = MountainCarTileCoder(iht_size=1024, num_tilings=8, num_tiles=8)
+test = [mctc_test.get_tiles(np.random.uniform(-1.2, 0.5), np.random.uniform(-0.07, 0.07)) for _ in range(10)]
+np.save("tiles_test", test)
