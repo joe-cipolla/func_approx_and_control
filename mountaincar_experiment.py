@@ -228,7 +228,7 @@ class SarsaAgent(BaseAgent):
 
 
 
-# Unit tests
+### Unit tests
 tests = [[-1.0, 0.01], [0.1, -0.01], [0.2, -0.05], [-1.0, 0.011], [0.2, -0.05]]
 
 mctc = MountainCarTileCoder(iht_size=1024, num_tilings=8, num_tiles=8)
@@ -257,3 +257,113 @@ np.random.seed(1)
 mctc_test = MountainCarTileCoder(iht_size=1024, num_tilings=8, num_tiles=8)
 test = [mctc_test.get_tiles(np.random.uniform(-1.2, 0.5), np.random.uniform(-0.07, 0.07)) for _ in range(10)]
 np.save("tiles_test", test)
+
+
+# Test Epsilon Greedy Function
+agent = SarsaAgent()
+agent.agent_init({"epsilon": 0.1})
+agent.w = np.array([np.array([1, 2, 3]), np.array([4, 5, 6]), np.array([7, 8, 9])])
+
+total = 0
+for i in range(1000):
+    chosen_action, action_value = agent.select_action(np.array([0,1]))
+    total += action_value
+print(total)
+assert total < 15000, "Check that you are not always choosing the best action"
+
+np.save("epsilon_test", total)
+
+agent = SarsaAgent()
+agent.agent_init({"epsilon": 0.0})
+agent.w = np.array([np.array([1, 2, 3]), np.array([4, 5, 6]), np.array([7, 8, 9])])
+
+chosen_action, action_value = agent.select_action(np.array([0,1]))
+print("Expected value")
+print("(2, 15)")
+
+print("Your value")
+print((chosen_action, action_value))
+
+np.save("egreedy_test", (chosen_action, action_value))
+
+
+# Test Sarsa Agent
+num_runs = 10
+num_episodes = 50
+env_info = {"num_tiles": 8, "num_tilings": 8}
+agent_info = {}
+all_steps = []
+
+agent = SarsaAgent
+env = mountaincar_env.Environment
+start = time.time()
+
+for run in range(num_runs):
+    if run % 5 == 0:
+        print("RUN: {}".format(run))
+
+    rl_glue = RLGlue(env, agent)
+    rl_glue.rl_init(agent_info, env_info)
+    steps_per_episode = []
+
+    for episode in range(num_episodes):
+        rl_glue.rl_episode(15000)
+        steps_per_episode.append(rl_glue.num_steps)
+
+    all_steps.append(np.array(steps_per_episode))
+
+print("Run time: {}".format(time.time() - start))
+
+plt.plot(np.mean(np.array(all_steps), axis=0))
+np.save("sarsa_test", np.array(all_steps))
+
+
+
+# Compare the three
+num_runs = 20
+num_episodes = 100
+env_info = {}
+
+agent_runs = []
+# alphas = [0.2, 0.4, 0.5, 1.0]
+alphas = [0.5]
+agent_info_options = [{"num_tiles": 16, "num_tilings": 2, "alpha": 0.5},
+                      {"num_tiles": 4, "num_tilings": 32, "alpha": 0.5},
+                      {"num_tiles": 8, "num_tilings": 8, "alpha": 0.5}]
+agent_info_options = [{"num_tiles" : agent["num_tiles"],
+                       "num_tilings": agent["num_tilings"],
+                       "alpha" : alpha} for agent in agent_info_options for alpha in alphas]
+
+agent = SarsaAgent
+env = mountaincar_env.Environment
+for agent_info in agent_info_options:
+    all_steps = []
+    start = time.time()
+    for run in range(num_runs):
+        if run % 5 == 0:
+            print("RUN: {}".format(run))
+        env = mountaincar_env.Environment
+
+        rl_glue = RLGlue(env, agent)
+        rl_glue.rl_init(agent_info, env_info)
+        steps_per_episode = []
+
+        for episode in range(num_episodes):
+            rl_glue.rl_episode(15000)
+            steps_per_episode.append(rl_glue.num_steps)
+        all_steps.append(np.array(steps_per_episode))
+
+    agent_runs.append(np.mean(np.array(all_steps), axis=0))
+    print(rl_glue.agent.alpha)
+    print("Run Time: {}".format(time.time() - start))
+
+plt.figure(figsize=(15, 10), dpi= 80, facecolor='w', edgecolor='k')
+plt.plot(np.array(agent_runs).T)
+plt.xlabel("Episode")
+plt.ylabel("Steps Per Episode")
+plt.yscale("linear")
+plt.ylim(0, 1000)
+plt.legend(["num_tiles: {}, num_tilings: {}, alpha: {}".format(agent_info["num_tiles"],
+                                                               agent_info["num_tilings"],
+                                                               agent_info["alpha"])
+            for agent_info in agent_info_options])
