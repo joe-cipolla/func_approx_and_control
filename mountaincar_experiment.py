@@ -124,7 +124,7 @@ class SarsaAgent(BaseAgent):
         # Otherwise choose the greedy action using the given argmax
         # function and the action values (don't use numpy's armax)
 
-        for action in range(len(self.num_actions)):
+        for action in range(self.num_actions):
             action_values.append(np.sum(self.w[action][tiles]))
 
         if np.random.random() < self.epsilon:
